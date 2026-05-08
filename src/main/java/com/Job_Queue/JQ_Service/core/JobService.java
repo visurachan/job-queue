@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -50,5 +52,50 @@ public class JobService {
         }
 
         jobRepository.save(job);
+    }
+
+    @Transactional
+    public Job submit(String type, String payload) {
+        Job job = new Job();
+        job.setType(type);
+        job.setPayload(payload);
+        job.setStatus("PENDING");
+        job.setAttempts(0);
+        job.setMaxAttempts(5);
+        job.setRunAt(LocalDateTime.now());
+        job.setCreatedAt(LocalDateTime.now());
+        job.setUpdatedAt(LocalDateTime.now());
+        return jobRepository.save(job);
+    }
+
+    public Optional<Job> findById(UUID id) {
+        return jobRepository.findById(id);
+    }
+
+    public List<Job> findJobs(String status, String type, int limit) {
+        return jobRepository.findJobsFiltered(status, type, limit);
+    }
+
+    @Transactional
+    public Optional<Job> resubmit(UUID id) {
+        return jobRepository.findById(id).map(job -> {
+            job.setStatus("PENDING");
+            job.setAttempts(0);
+            job.setRunAt(LocalDateTime.now());
+            job.setUpdatedAt(LocalDateTime.now());
+            return jobRepository.save(job);
+        });
+    }
+
+    @Transactional
+    public Optional<Job> cancel(UUID id) {
+        return jobRepository.findById(id).map(job -> {
+            if (job.getStatus().equals("PENDING")) {
+                job.setStatus("CANCELLED");
+                job.setUpdatedAt(LocalDateTime.now());
+                return jobRepository.save(job);
+            }
+            return job;
+        });
     }
 }
