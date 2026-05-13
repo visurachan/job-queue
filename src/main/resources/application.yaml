@@ -2,7 +2,7 @@ spring:
   application:
     name: JQ_Service
   datasource:
-    url: jdbc:postgresql://localhost:5432/jobqueue
+    url: jdbc:postgresql://localhost:5436/jobqueue
     username: jobqueue
     password: jobqueue
     driver-class-name: org.postgresql.Driver
@@ -18,7 +18,7 @@ spring:
     locations: classpath:db/migration
 
 server:
-  port: 8080
+  port: 8083
 
 management:
   endpoints:
